@@ -8,8 +8,7 @@ const valid = {
   SESSION_SECRET: "a".repeat(32),
 };
 
-// ALIŞTIRMA 1.1: src/env.ts dosyasını yazdıktan sonra `.skip`'i kaldır.
-describe.skip("parseEnv", () => {
+describe("parseEnv", () => {
   it("geçerli bir ortamı kabul eder", () => {
     const env = parseEnv(valid);
     expect(env.DATABASE_URL).toBe(valid.DATABASE_URL);

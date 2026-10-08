@@ -45,6 +45,6 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 - [ ] 1.6 Test ve CI
 - [ ] 1.7 Canlıya alma
 
-## Alıştırmalar
+## Notlar
 
-- [1.1 Ortam değişkenlerini doğrulamak](docs/alistirmalar/1.1-ortam-degiskenleri.md)
+- [1.1 Ortam değişkenlerini doğrulamak](docs/notlar/1.1-ortam-degiskenleri.md)
