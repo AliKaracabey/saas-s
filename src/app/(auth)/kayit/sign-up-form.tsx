@@ -4,11 +4,12 @@ import { useActionState } from "react";
 import { Field, FormMessage, SubmitButton } from "@/components/form";
 import { signUp } from "@/lib/auth/actions";
 
-export function SignUpForm() {
+export function SignUpForm({ next }: { next?: string }) {
   const [state, action] = useActionState(signUp, undefined);
   return (
     <form action={action} className="flex flex-col gap-4">
       <FormMessage state={state} />
+      {next && <input type="hidden" name="next" value={next} />}
       <Field label="Ad" name="name" autoComplete="name" required />
       <Field
         label="E-posta"

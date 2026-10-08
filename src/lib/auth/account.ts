@@ -1,6 +1,7 @@
 import "server-only";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/db";
+import { isUniqueViolation } from "@/db/errors";
 import {
   oauthAccounts,
   users,
@@ -25,14 +26,6 @@ const TOKEN_LIFETIME_MS: Record<TokenPurpose, number> = {
   // Şifre sıfırlama linki daha hassastır, ömrü kısa tutulur.
   password_reset: 1 * HOUR,
 };
-
-// Postgres'in "unique ihlali" hata kodu.
-const UNIQUE_VIOLATION = "23505";
-
-function isUniqueViolation(error: unknown): boolean {
-  const cause = (error as { cause?: { code?: string } })?.cause;
-  return cause?.code === UNIQUE_VIOLATION;
-}
 
 function findUserByEmail(email: string) {
   return db.query.users.findFirst({

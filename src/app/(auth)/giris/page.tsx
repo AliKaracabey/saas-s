@@ -15,9 +15,9 @@ const errors: Record<string, string> = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ hata?: string }>;
+  searchParams: Promise<{ hata?: string; sonra?: string }>;
 }) {
-  const { hata } = await searchParams;
+  const { hata, sonra } = await searchParams;
   const error = hata ? errors[hata] : undefined;
 
   return (
@@ -53,12 +53,15 @@ export default async function SignInPage({
           </div>
         </>
       )}
-      <SignInForm />
+      <SignInForm next={sonra} />
       <div className="flex justify-between text-sm text-neutral-600 dark:text-neutral-400">
         <Link href="/sifremi-unuttum" className="underline">
           Şifremi unuttum
         </Link>
-        <Link href="/kayit" className="font-medium underline">
+        <Link
+          href={sonra ? `/kayit?sonra=${encodeURIComponent(sonra)}` : "/kayit"}
+          className="font-medium underline"
+        >
           Kayıt ol
         </Link>
       </div>
