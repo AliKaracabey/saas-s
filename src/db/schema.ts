@@ -34,6 +34,10 @@ const timestamps = {
 
 export const roleEnum = pgEnum("role", ["owner", "admin", "member"]);
 export const planEnum = pgEnum("plan", ["free", "pro"]);
+export const tokenPurposeEnum = pgEnum("token_purpose", [
+  "email_verification",
+  "password_reset",
+]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "trialing",
   "active",
@@ -105,6 +109,22 @@ export const sessions = pgTable(
   (t) => [index("sessions_user_id_idx").on(t.userId)],
 );
 
+// E-posta doğrulama ve şifre sıfırlama linklerindeki tek kullanımlık token'lar.
+// Kullanılınca silinir; süresi dolanlar geçersiz sayılır.
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    purpose: tokenPurposeEnum("purpose").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("verification_tokens_user_id_idx").on(t.userId, t.purpose)],
+);
+
 export const invitations = pgTable(
   "invitations",
   {
@@ -152,4 +172,6 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Organization = typeof organizations.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+export type TokenPurpose = (typeof tokenPurposeEnum.enumValues)[number];
 export type Role = (typeof roleEnum.enumValues)[number];

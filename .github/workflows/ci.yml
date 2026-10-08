@@ -24,6 +24,11 @@ jobs:
           --health-retries 10
     env:
       TEST_DATABASE_URL: postgres://saas:saas@localhost:5432/saas_test
+      # Derleme sırasında sayfalar içe aktarılır ve ortam değişkenleri
+      # doğrulanır; gerçek değerler gerekmez.
+      DATABASE_URL: postgres://saas:saas@localhost:5432/saas
+      APP_URL: http://localhost:3000
+      SESSION_SECRET: ci-icin-en-az-otuz-iki-karakterlik-anahtar
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
