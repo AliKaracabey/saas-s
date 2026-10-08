@@ -13,6 +13,7 @@ import {
   type User,
 } from "@/db/schema";
 import { generateToken, hashToken } from "@/lib/auth/tokens";
+import { planLimits } from "@/lib/billing/plans";
 import { env } from "@/server-env";
 import { can, canManageMember } from "./permissions";
 import { slugify } from "./slug";
@@ -211,13 +212,43 @@ export async function removeMember(
   });
 }
 
+/**
+ * Ekipte kullanılan "koltuk" sayısı: üyeler + süresi dolmamış bekleyen
+ * davetler. `exceptEmail` verilirse o adrese giden davet sayılmaz.
+ */
+export async function getSeatUsage(
+  organizationId: string,
+  exceptEmail?: string,
+): Promise<number> {
+  const [[members], [pending]] = await Promise.all([
+    db
+      .select({ n: count() })
+      .from(memberships)
+      .where(eq(memberships.organizationId, organizationId)),
+    db
+      .select({ n: count() })
+      .from(invitations)
+      .where(
+        and(
+          eq(invitations.organizationId, organizationId),
+          isNull(invitations.acceptedAt),
+          gt(invitations.expiresAt, new Date()),
+          exceptEmail
+            ? sql`lower(${invitations.email}) <> ${exceptEmail.toLowerCase()}`
+            : undefined,
+        ),
+      ),
+  ]);
+  return (members?.n ?? 0) + (pending?.n ?? 0);
+}
+
 export async function createInvitation(
   actor: Actor,
   email: string,
   role: Role,
 ): Promise<
   | { ok: true; token: string }
-  | { ok: false; error: "forbidden" | "already_member" }
+  | { ok: false; error: "forbidden" | "already_member" | "plan_limit" }
 > {
   if (
     !can(actor.role, "member:invite") ||
@@ -237,6 +268,17 @@ export async function createInvitation(
       ),
     );
   if (existing && existing.n > 0) return { ok: false, error: "already_member" };
+
+  // Plan sınırı: üyeler + bekleyen davetler, planın izin verdiğinden fazla
+  // olamaz. (Aynı kişiye tekrar davet atılıyorsa eski davet silineceği için
+  // onu saymıyoruz.)
+  const [{ plan }, usage] = await Promise.all([
+    getPlan(actor.organizationId),
+    getSeatUsage(actor.organizationId, email),
+  ]);
+  if (usage >= planLimits[plan].members) {
+    return { ok: false, error: "plan_limit" };
+  }
 
   const token = generateToken();
   await db.transaction(async (tx) => {

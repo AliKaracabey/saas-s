@@ -11,11 +11,19 @@ const THIRTY_DAYS_IN_SECONDS = 30 * 24 * 60 * 60;
  *    tarayıcısına bizim adımıza form gönderttiremez. (Next.js server
  *    action'ları bunu zaten yapıyor; bu kural ileride ekleyeceğimiz API
  *    route'larını da kapsar.)
+ *    İstisna: Stripe webhook'u. Onu tarayıcı değil Stripe'ın sunucusu
+ *    çağırır, Origin başlığı olmaz ve çerez taşımaz. Kendi imza kontrolü
+ *    olduğu için CSRF kontrolüne ihtiyacı yok.
  * 2. Oturum çerezinin süresini uzatma: Server component'ler çerez yazamaz.
  *    Veritabanındaki oturum session.ts içinde uzatılıyor; çerezin kendisini
  *    de burada, her sayfa açılışında 30 güne uzatıyoruz.
  */
+const CSRF_EXEMPT_PATHS = new Set(["/api/stripe/webhook"]);
+
 export function middleware(request: NextRequest) {
+  if (CSRF_EXEMPT_PATHS.has(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
   if (request.method !== "GET" && request.method !== "HEAD") {
     const origin = request.headers.get("origin");
     const host =

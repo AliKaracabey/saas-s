@@ -41,6 +41,8 @@ const errors = {
   not_found: "Üye bulunamadı.",
   last_owner: "Ekibin en az bir sahibi olmalı. Önce başka birini sahip yap.",
   already_member: "Bu kişi zaten ekipte.",
+  plan_limit:
+    "Planının üye sınırına ulaştın. Daha fazla kişi eklemek için Pro'ya geç.",
 } as const;
 
 export async function createOrganizationAction(

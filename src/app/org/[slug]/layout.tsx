@@ -19,6 +19,9 @@ export default async function OrganizationLayout({
     ...(can(role, "org:update")
       ? [{ href: `/org/${slug}/ayarlar`, label: "Ayarlar" }]
       : []),
+    ...(can(role, "billing:manage")
+      ? [{ href: `/org/${slug}/faturalandirma`, label: "Faturalandırma" }]
+      : []),
   ];
 
   return (

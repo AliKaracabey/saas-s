@@ -31,6 +31,12 @@ export const envSchema = z.object({
   // sayfasında GitHub butonu görünmez.
   GITHUB_CLIENT_ID: z.string().min(1).optional(),
   GITHUB_CLIENT_SECRET: z.string().min(1).optional(),
+
+  // Stripe ile ödeme için (isteğe bağlı). Üçü de verilmezse faturalandırma
+  // sayfası "ödeme ayarlanmamış" der, uygulamanın geri kalanı çalışır.
+  STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
+  STRIPE_PRICE_PRO: z.string().startsWith("price_").optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -48,6 +54,17 @@ export function parseEnv(raw: Record<string, string | undefined>): Env {
       message: "ikisi birlikte verilmeli",
       path: ["GITHUB_CLIENT_ID"],
     })
+    .refine(
+      (env) => {
+        const set = [
+          env.STRIPE_SECRET_KEY,
+          env.STRIPE_WEBHOOK_SECRET,
+          env.STRIPE_PRICE_PRO,
+        ].filter(Boolean).length;
+        return set === 0 || set === 3;
+      },
+      { message: "üçü birlikte verilmeli", path: ["STRIPE_SECRET_KEY"] },
+    )
     .safeParse(dropEmpty(raw));
 
   if (!result.success) {

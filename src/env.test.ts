@@ -128,4 +128,30 @@ describe("parseEnv", () => {
       ).toBe("id");
     });
   });
+
+  describe("STRIPE_*", () => {
+    const stripe = {
+      STRIPE_SECRET_KEY: "sk_test_123",
+      STRIPE_WEBHOOK_SECRET: "whsec_123",
+      STRIPE_PRICE_PRO: "price_123",
+    };
+
+    it("üçü birlikte verilince kabul edilir", () => {
+      expect(parseEnv({ ...valid, ...stripe }).STRIPE_PRICE_PRO).toBe(
+        "price_123",
+      );
+    });
+
+    it("eksik verilirse reddedilir", () => {
+      expect(() =>
+        parseEnv({ ...valid, STRIPE_SECRET_KEY: stripe.STRIPE_SECRET_KEY }),
+      ).toThrow(/STRIPE_SECRET_KEY/);
+    });
+
+    it("yanlış türde anahtarı reddeder", () => {
+      expect(() =>
+        parseEnv({ ...valid, ...stripe, STRIPE_SECRET_KEY: "pk_test_123" }),
+      ).toThrow(/STRIPE_SECRET_KEY/);
+    });
+  });
 });

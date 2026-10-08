@@ -38,12 +38,17 @@ export const tokenPurposeEnum = pgEnum("token_purpose", [
   "email_verification",
   "password_reset",
 ]);
+// Stripe'ın abonelik durumlarının birebir aynısı. Kendi tablomuzu Stripe'tan
+// gelen veriyle senkron tuttuğumuz için durumları çevirmeden saklıyoruz.
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "trialing",
   "active",
   "past_due",
   "canceled",
   "incomplete",
+  "incomplete_expired",
+  "unpaid",
+  "paused",
 ]);
 
 export const users = pgTable(
@@ -188,10 +193,23 @@ export const subscriptions = pgTable("subscriptions", {
   ...timestamps,
 });
 
+// İşlenmiş Stripe webhook olayları. Stripe aynı olayı birden fazla kez
+// gönderebilir; bu tablo her olayın sadece bir kez işlenmesini sağlar.
+export const stripeEvents = pgTable("stripe_events", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Organization = typeof organizations.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type TokenPurpose = (typeof tokenPurposeEnum.enumValues)[number];
+export type Plan = (typeof planEnum.enumValues)[number];
+export type SubscriptionStatus =
+  (typeof subscriptionStatusEnum.enumValues)[number];
 export type Role = (typeof roleEnum.enumValues)[number];
