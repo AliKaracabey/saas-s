@@ -6,7 +6,7 @@ Her SaaS ürününün ihtiyaç duyduğu ortak altyapıyı (kimlik doğrulama, ek
 
 ## Teknolojiler
 
-Next.js 15 (App Router) · TypeScript (strict) · PostgreSQL 17 · Zod · Tailwind CSS · Vitest · ESLint + Prettier · GitHub Actions
+Next.js 15 (App Router) · TypeScript (strict) · PostgreSQL 17 · Drizzle ORM · Zod · Tailwind CSS · Vitest · ESLint + Prettier · GitHub Actions
 
 ## Kurulum
 
@@ -18,6 +18,8 @@ cd saas-s
 npm install            # bağımlılıklar + git hook'ları (Husky)
 cp .env.example .env   # Windows PowerShell: Copy-Item .env.example .env
 npm run db:up          # PostgreSQL'i Docker'da başlatır
+npm run db:migrate     # tabloları oluşturur
+npm run db:seed        # örnek verileri ekler
 npm run dev            # http://localhost:3000
 ```
 
@@ -38,7 +40,7 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 ## Yol haritası
 
 - [x] 1.1 Proje iskeleti ve geliştirme ortamı
-- [ ] 1.2 Veritabanı tasarımı
+- [x] 1.2 Veritabanı tasarımı
 - [ ] 1.3 Kimlik doğrulamayı sıfırdan yazmak
 - [ ] 1.4 Çok kiracılık ve yetkilendirme
 - [ ] 1.5 Abonelik ve ödeme (Stripe)
@@ -48,3 +50,4 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 ## Notlar
 
 - [1.1 Ortam değişkenlerini doğrulamak](docs/notlar/1.1-ortam-degiskenleri.md)
+- [1.2 Veritabanı tasarımı](docs/notlar/1.2-veritabani-tasarimi.md)
