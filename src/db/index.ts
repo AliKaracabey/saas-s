@@ -1,9 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { parseEnv } from "@/env";
+import { env } from "@/server-env";
 import * as schema from "./schema";
-
-const env = parseEnv(process.env);
 
 // Geliştirme sırasında Next.js dosyaları her değişiklikte yeniden yükler.
 // Bağlantıyı globalThis üzerinde saklamazsak her yüklemede yeni bir bağlantı
