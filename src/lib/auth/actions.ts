@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { env } from "@/server-env";
 import { sendEmail } from "@/lib/email";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import {
   authenticate,
   createPasswordReset,
@@ -60,7 +61,7 @@ export async function signUp(_: FormState, form: FormData): Promise<FormState> {
 
   await sendVerificationEmail(result.user.id, result.user.email);
   await startSession(result.user.id);
-  redirect("/panel");
+  redirect(safeRedirectPath(form.get("next")));
 }
 
 export async function signIn(_: FormState, form: FormData): Promise<FormState> {
@@ -73,7 +74,7 @@ export async function signIn(_: FormState, form: FormData): Promise<FormState> {
   if (!user) return { error: "E-posta veya şifre hatalı." };
 
   await startSession(user.id);
-  redirect("/panel");
+  redirect(safeRedirectPath(form.get("next")));
 }
 
 export async function signOut(): Promise<void> {
