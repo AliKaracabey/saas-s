@@ -26,12 +26,29 @@ export const envSchema = z.object({
 
   // Ortam değişkenleri hep metindir; coerce "8080" metnini 8080 sayısına çevirir.
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+
+  // GitHub ile giriş için (isteğe bağlı). İkisi de verilmezse giriş
+  // sayfasında GitHub butonu görünmez.
+  GITHUB_CLIENT_ID: z.string().min(1).optional(),
+  GITHUB_CLIENT_SECRET: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
 
+// Boş bırakılmış değişkenleri ("GITHUB_CLIENT_ID=") hiç verilmemiş sayarız.
+function dropEmpty(raw: Record<string, string | undefined>) {
+  return Object.fromEntries(
+    Object.entries(raw).filter(([, value]) => value !== ""),
+  );
+}
+
 export function parseEnv(raw: Record<string, string | undefined>): Env {
-  const result = envSchema.safeParse(raw);
+  const result = envSchema
+    .refine((env) => !env.GITHUB_CLIENT_ID === !env.GITHUB_CLIENT_SECRET, {
+      message: "ikisi birlikte verilmeli",
+      path: ["GITHUB_CLIENT_ID"],
+    })
+    .safeParse(dropEmpty(raw));
 
   if (!result.success) {
     // Bir değişken birden fazla kurala takılabilir; adları tekilleştiririz.

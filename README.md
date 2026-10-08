@@ -44,7 +44,7 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 - [x] 1.1 Proje iskeleti ve geliştirme ortamı
 - [x] 1.2 Veritabanı tasarımı
 - [x] 1.3 Kimlik doğrulamayı sıfırdan yazmak (e-posta ve şifre)
-- [ ] 1.3b GitHub ile giriş (OAuth 2.0)
+- [x] 1.3b GitHub ile giriş (OAuth 2.0)
 - [ ] 1.4 Çok kiracılık ve yetkilendirme
 - [ ] 1.5 Abonelik ve ödeme (Stripe)
 - [ ] 1.6 Test ve CI
@@ -55,3 +55,4 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 - [1.1 Ortam değişkenlerini doğrulamak](docs/notlar/1.1-ortam-degiskenleri.md)
 - [1.2 Veritabanı tasarımı](docs/notlar/1.2-veritabani-tasarimi.md)
 - [1.3 Kimlik doğrulama](docs/notlar/1.3-kimlik-dogrulama.md)
+- [1.3b GitHub ile giriş](docs/notlar/1.3b-github-ile-giris.md)

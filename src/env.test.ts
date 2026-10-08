@@ -104,4 +104,28 @@ describe("parseEnv", () => {
     expect(message).toMatch(/APP_URL/);
     expect(message).toMatch(/SESSION_SECRET/);
   });
+
+  describe("GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET", () => {
+    it("isteğe bağlıdır; boş bırakılırsa verilmemiş sayılır", () => {
+      const env = parseEnv({
+        ...valid,
+        GITHUB_CLIENT_ID: "",
+        GITHUB_CLIENT_SECRET: "",
+      });
+      expect(env.GITHUB_CLIENT_ID).toBeUndefined();
+    });
+
+    it("ikisi birlikte verilmelidir", () => {
+      expect(() => parseEnv({ ...valid, GITHUB_CLIENT_ID: "id" })).toThrow(
+        /GITHUB_CLIENT_ID/,
+      );
+      expect(
+        parseEnv({
+          ...valid,
+          GITHUB_CLIENT_ID: "id",
+          GITHUB_CLIENT_SECRET: "s",
+        }).GITHUB_CLIENT_ID,
+      ).toBe("id");
+    });
+  });
 });

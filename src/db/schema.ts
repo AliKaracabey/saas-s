@@ -109,6 +109,26 @@ export const sessions = pgTable(
   (t) => [index("sessions_user_id_idx").on(t.userId)],
 );
 
+// Kullanıcının GitHub gibi dış servislerdeki hesapları. Bir kullanıcının hem
+// şifresi hem GitHub hesabı olabilir; ikisiyle de aynı hesaba girer.
+export const oauthAccounts = pgTable(
+  "oauth_accounts",
+  {
+    provider: text("provider").notNull(),
+    // GitHub'daki kullanıcı numarası. Kullanıcı adı değişebilir, bu değişmez.
+    providerAccountId: text("provider_account_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [
+    primaryKey({ columns: [t.provider, t.providerAccountId] }),
+    // Bir kullanıcıya her servisten tek hesap bağlanabilir.
+    uniqueIndex("oauth_accounts_user_provider_idx").on(t.userId, t.provider),
+  ],
+);
+
 // E-posta doğrulama ve şifre sıfırlama linklerindeki tek kullanımlık token'lar.
 // Kullanılınca silinir; süresi dolanlar geçersiz sayılır.
 export const verificationTokens = pgTable(
