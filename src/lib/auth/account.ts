@@ -2,6 +2,7 @@ import "server-only";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  oauthAccounts,
   users,
   verificationTokens,
   type TokenPurpose,
@@ -170,4 +171,86 @@ export async function resetPassword(
   // kapanmasını bekler.
   await invalidateUserSessions(userId);
   return userId;
+}
+
+export type OAuthProfile = {
+  provider: "github";
+  providerAccountId: string;
+  name: string;
+  verifiedEmail: string | null;
+};
+
+export type OAuthLoginResult =
+  | { ok: true; user: User; created: boolean }
+  | { ok: false; error: "email_required" | "account_conflict" };
+
+/**
+ * GitHub ile giriş yapan kişiyi bir kullanıcıya eşler:
+ * 1. Bu GitHub hesabı daha önce bağlandıysa o kullanıcı.
+ * 2. Aynı e-postayla kayıtlı bir kullanıcı varsa, GitHub hesabı ona bağlanır.
+ *    Bunu sadece GitHub e-postayı doğruladıysa yaparız; aksi halde biri
+ *    başkasının e-postasını GitHub'a ekleyip onun hesabına girebilirdi.
+ * 3. Hiçbiri yoksa yeni bir kullanıcı oluşturulur (şifresiz).
+ */
+export async function loginWithOAuth(
+  profile: OAuthProfile,
+): Promise<OAuthLoginResult> {
+  return db.transaction(async (tx) => {
+    const [linked] = await tx
+      .select({ user: users })
+      .from(oauthAccounts)
+      .innerJoin(users, eq(users.id, oauthAccounts.userId))
+      .where(
+        and(
+          eq(oauthAccounts.provider, profile.provider),
+          eq(oauthAccounts.providerAccountId, profile.providerAccountId),
+        ),
+      );
+    if (linked) return { ok: true, user: linked.user, created: false };
+
+    if (!profile.verifiedEmail) return { ok: false, error: "email_required" };
+
+    const existing = await tx.query.users.findFirst({
+      where: (u) =>
+        eq(sql`lower(${u.email})`, profile.verifiedEmail!.toLowerCase()),
+    });
+
+    if (existing) {
+      // Bu kullanıcıya başka bir GitHub hesabı zaten bağlı.
+      const other = await tx.query.oauthAccounts.findFirst({
+        where: (a) =>
+          and(eq(a.userId, existing.id), eq(a.provider, profile.provider)),
+      });
+      if (other) return { ok: false, error: "account_conflict" };
+    }
+
+    const user =
+      existing ??
+      (
+        await tx
+          .insert(users)
+          .values({
+            name: profile.name,
+            email: profile.verifiedEmail,
+            emailVerifiedAt: new Date(),
+          })
+          .returning()
+      )[0]!;
+
+    if (existing && !existing.emailVerifiedAt) {
+      // GitHub bu adresin sahibi olduğunu doğruladı.
+      await tx
+        .update(users)
+        .set({ emailVerifiedAt: new Date() })
+        .where(eq(users.id, existing.id));
+    }
+
+    await tx.insert(oauthAccounts).values({
+      provider: profile.provider,
+      providerAccountId: profile.providerAccountId,
+      userId: user.id,
+    });
+
+    return { ok: true, user, created: !existing };
+  });
 }

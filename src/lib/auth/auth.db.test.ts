@@ -6,6 +6,7 @@ import {
   authenticate,
   createPasswordReset,
   createVerificationToken,
+  loginWithOAuth,
   registerUser,
   resetPassword,
   verifyEmail,
@@ -170,5 +171,60 @@ describe("şifre sıfırlama", () => {
 
     expect(await resetPassword(reset!.token, "yepyeni-sifre")).not.toBeNull();
     expect(await resetPassword(reset!.token, "baska-sifre")).toBeNull();
+  });
+});
+
+describe("GitHub ile giriş", () => {
+  const github = {
+    provider: "github" as const,
+    providerAccountId: "12345",
+    name: "Ali GitHub",
+    verifiedEmail: "ali@ornek.com",
+  };
+
+  it("yeni kişi için doğrulanmış, şifresiz bir kullanıcı oluşturur", async () => {
+    const result = await loginWithOAuth(github);
+    expect(result.ok && result.created).toBe(true);
+    if (!result.ok) return;
+    expect(result.user.passwordHash).toBeNull();
+    expect(result.user.emailVerifiedAt).not.toBeNull();
+  });
+
+  it("aynı GitHub hesabıyla ikinci girişte aynı kullanıcıyı bulur", async () => {
+    const first = await loginWithOAuth(github);
+    // GitHub'daki e-posta sonradan değişse bile hesap numarasından bulunur.
+    const second = await loginWithOAuth({
+      ...github,
+      verifiedEmail: "yeni@ornek.com",
+    });
+    expect(second.ok && first.ok && second.user.id === first.user.id).toBe(
+      true,
+    );
+  });
+
+  it("aynı e-postalı mevcut hesaba bağlanır ve e-postayı doğrular", async () => {
+    const user = await registerAli();
+    const result = await loginWithOAuth(github);
+
+    expect(result.ok && result.user.id).toBe(user.id);
+    expect(result.ok && result.created).toBe(false);
+    const [row] = await db.select().from(users).where(eq(users.id, user.id));
+    expect(row?.emailVerifiedAt).not.toBeNull();
+    // Şifresi de çalışmaya devam eder.
+    expect(await authenticate(ali.email, ali.password)).not.toBeNull();
+  });
+
+  it("GitHub e-postası doğrulanmamışsa giriş yapmaz", async () => {
+    expect(await loginWithOAuth({ ...github, verifiedEmail: null })).toEqual({
+      ok: false,
+      error: "email_required",
+    });
+  });
+
+  it("hesaba başka bir GitHub hesabı bağlıysa ikincisini bağlamaz", async () => {
+    await loginWithOAuth(github);
+    expect(
+      await loginWithOAuth({ ...github, providerAccountId: "99999" }),
+    ).toEqual({ ok: false, error: "account_conflict" });
   });
 });

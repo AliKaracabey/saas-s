@@ -15,6 +15,13 @@
       "when": 1791467332588,
       "tag": "0001_dogrulama_tokenlari",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791467873774,
+      "tag": "0002_oauth_hesaplari",
+      "breakpoints": true
     }
   ]
 }
