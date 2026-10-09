@@ -154,4 +154,44 @@ describe("parseEnv", () => {
       ).toThrow(/STRIPE_SECRET_KEY/);
     });
   });
+
+  describe("RESEND_API_KEY ve EMAIL_FROM", () => {
+    it("ikisi birlikte verilince kabul edilir", () => {
+      const env = parseEnv({
+        ...valid,
+        RESEND_API_KEY: "re_123",
+        EMAIL_FROM: "saas-s <bildirim@ornek.com>",
+      });
+      expect(env.RESEND_API_KEY).toBe("re_123");
+    });
+
+    it("biri eksikse reddedilir", () => {
+      expect(() => parseEnv({ ...valid, RESEND_API_KEY: "re_123" })).toThrow(
+        /RESEND_API_KEY/,
+      );
+    });
+  });
+
+  describe("APP_URL canlıda", () => {
+    const production = { ...valid, NODE_ENV: "production" };
+
+    it("https adresini kabul eder", () => {
+      expect(
+        parseEnv({ ...production, APP_URL: "https://saas-s.vercel.app" })
+          .APP_URL,
+      ).toBe("https://saas-s.vercel.app");
+    });
+
+    it("http adresini reddeder", () => {
+      expect(() =>
+        parseEnv({ ...production, APP_URL: "http://saas-s.vercel.app" }),
+      ).toThrow(/APP_URL/);
+    });
+
+    it("localhost'a izin verir", () => {
+      expect(() =>
+        parseEnv({ ...production, APP_URL: "http://localhost:3100" }),
+      ).not.toThrow();
+    });
+  });
 });
