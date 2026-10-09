@@ -296,3 +296,33 @@ describe("organizasyonu silme", () => {
     expect(await getMembership(ali.id, org.slug)).toBeNull();
   });
 });
+
+describe("plan sınırı", () => {
+  it("ücretsiz planda 5 kişiden (üye + davet) fazlasına izin vermez", async () => {
+    const ali = await user("ali");
+    const org = await createOrganization(ali.id, "Ekip");
+    const owner = await actorFor(ali, org.slug);
+
+    for (let i = 1; i <= 4; i++) {
+      expect(
+        (await createInvitation(owner, `kisi${i}@ornek.com`, "member")).ok,
+      ).toBe(true);
+    }
+    expect(await createInvitation(owner, "fazla@ornek.com", "member")).toEqual({
+      ok: false,
+      error: "plan_limit",
+    });
+    // Aynı kişiye tekrar davet yeni koltuk sayılmaz.
+    expect(
+      (await createInvitation(owner, "kisi1@ornek.com", "member")).ok,
+    ).toBe(true);
+
+    await db
+      .update(subscriptions)
+      .set({ plan: "pro" })
+      .where(eq(subscriptions.organizationId, org.id));
+    expect(
+      (await createInvitation(owner, "fazla@ornek.com", "member")).ok,
+    ).toBe(true);
+  });
+});
