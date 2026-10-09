@@ -27,6 +27,10 @@ export const envSchema = z.object({
   // Ortam değişkenleri hep metindir; coerce "8080" metnini 8080 sayısına çevirir.
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
 
+  // Verilirse gönderilen e-postalar bu dosyaya da (her satıra bir JSON)
+  // yazılır. Uçtan uca testler doğrulama ve davet linklerini buradan okur.
+  EMAIL_OUTBOX_FILE: z.string().min(1).optional(),
+
   // GitHub ile giriş için (isteğe bağlı). İkisi de verilmezse giriş
   // sayfasında GitHub butonu görünmez.
   GITHUB_CLIENT_ID: z.string().min(1).optional(),

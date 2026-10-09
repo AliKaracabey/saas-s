@@ -34,10 +34,12 @@ Geliştirme ortamında e-postalar gönderilmez; doğrulama ve şifre sıfırlama
 | `npm run lint`              | ESLint                                   |
 | `npm run typecheck`         | TypeScript tip kontrolü                  |
 | `npm run format`            | Prettier ile tüm dosyaları biçimlendirir |
-| `npm test`                  | Vitest testleri                          |
+| `npm test`                  | Vitest birim testleri                    |
+| `npm run test:db`           | Veritabanı testleri (PostgreSQL gerekir) |
+| `npm run test:e2e`          | Playwright uçtan uca testleri            |
 | `npm run db:up` / `db:down` | PostgreSQL'i başlatır / durdurur         |
 
-Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik çalıştırır. Her pull request'te GitHub Actions lint, tip kontrolü, biçim kontrolü, testler ve derlemeyi çalıştırır.
+Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik çalıştırır. Her pull request'te GitHub Actions lint, tip kontrolü, biçim kontrolü, testler ve derlemeyi, paralel bir işte de uçtan uca testleri çalıştırır.
 
 ## Yol haritası
 
@@ -47,7 +49,7 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 - [x] 1.3b GitHub ile giriş (OAuth 2.0)
 - [x] 1.4 Çok kiracılık ve yetkilendirme (ekipler, roller, davetler)
 - [x] 1.5 Abonelik ve ödeme (Stripe)
-- [ ] 1.6 Test ve CI
+- [x] 1.6 Test ve CI (uçtan uca testler)
 - [ ] 1.7 Canlıya alma
 
 ## Notlar
@@ -58,3 +60,4 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 - [1.3b GitHub ile giriş](docs/notlar/1.3b-github-ile-giris.md)
 - [1.4 Ekipler, roller ve davetler](docs/notlar/1.4-ekipler-ve-roller.md)
 - [1.5 Abonelik ve ödeme](docs/notlar/1.5-abonelik-ve-odeme.md)
+- [1.6 Uçtan uca testler](docs/notlar/1.6-uctan-uca-testler.md)

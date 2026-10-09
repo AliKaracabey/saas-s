@@ -46,3 +46,47 @@ jobs:
       - run: npm test
       - run: npm run test:db
       - run: npm run build
+
+  # Uçtan uca testler: uygulama derlenip gerçek bir tarayıcıyla denenir.
+  # Ayrı bir iş olduğu için yukarıdaki kontrollerle paralel çalışır.
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: saas
+          POSTGRES_PASSWORD: saas
+          POSTGRES_DB: saas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U saas -d saas"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://saas:saas@localhost:5432/saas_test
+      DATABASE_URL: postgres://saas:saas@localhost:5432/saas
+      APP_URL: http://localhost:3100
+      SESSION_SECRET: ci-icin-en-az-otuz-iki-karakterlik-anahtar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      # Test düşerse ekran görüntüleri ve adım adım kayıtlar (trace) buradan
+      # indirilebilir: Actions sayfası → bu çalıştırma → Artifacts.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
