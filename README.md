@@ -6,7 +6,7 @@ Her SaaS ürününün ihtiyaç duyduğu ortak altyapıyı (kimlik doğrulama, ek
 
 ## Teknolojiler
 
-Next.js 15 (App Router) · TypeScript (strict) · PostgreSQL 17 · Drizzle ORM · Zod · Tailwind CSS · Vitest · ESLint + Prettier · GitHub Actions
+Next.js 15 (App Router) · TypeScript (strict) · PostgreSQL 17 · Drizzle ORM · Zod · Tailwind CSS · Stripe · Vitest · Playwright · ESLint + Prettier · GitHub Actions · Vercel · Neon · Resend
 
 ## Kurulum
 
@@ -50,7 +50,7 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 - [x] 1.4 Çok kiracılık ve yetkilendirme (ekipler, roller, davetler)
 - [x] 1.5 Abonelik ve ödeme (Stripe)
 - [x] 1.6 Test ve CI (uçtan uca testler)
-- [ ] 1.7 Canlıya alma
+- [x] 1.7 Canlıya alma (Vercel + Neon + Resend)
 
 ## Notlar
 
@@ -61,3 +61,4 @@ Her commit öncesinde Husky, değişen dosyalarda ESLint ve Prettier'ı otomatik
 - [1.4 Ekipler, roller ve davetler](docs/notlar/1.4-ekipler-ve-roller.md)
 - [1.5 Abonelik ve ödeme](docs/notlar/1.5-abonelik-ve-odeme.md)
 - [1.6 Uçtan uca testler](docs/notlar/1.6-uctan-uca-testler.md)
+- [1.7 Canlıya alma](docs/notlar/1.7-canliya-alma.md)

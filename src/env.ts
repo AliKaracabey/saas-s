@@ -41,6 +41,15 @@ export const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
   STRIPE_PRICE_PRO: z.string().startsWith("price_").optional(),
+
+  // Gerçek e-posta gönderimi için Resend (isteğe bağlı, ikisi birlikte).
+  // Verilmezse e-postalar sunucu konsoluna yazılır.
+  RESEND_API_KEY: z.string().startsWith("re_").optional(),
+  EMAIL_FROM: z.string().min(3).optional(),
+
+  // Zamanlanmış temizlik işini (/api/cron/temizlik) sadece Vercel'in
+  // çağırabilmesi için gizli anahtar. Verilmezse o adres kapalıdır.
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -68,6 +77,21 @@ export function parseEnv(raw: Record<string, string | undefined>): Env {
         return set === 0 || set === 3;
       },
       { message: "üçü birlikte verilmeli", path: ["STRIPE_SECRET_KEY"] },
+    )
+    .refine((env) => !env.RESEND_API_KEY === !env.EMAIL_FROM, {
+      message: "ikisi birlikte verilmeli",
+      path: ["RESEND_API_KEY"],
+    })
+    // Canlıda oturum çerezi sadece HTTPS üzerinden gönderilir (secure).
+    // APP_URL yanlışlıkla http:// verilirse e-postadaki linkler ve OAuth
+    // dönüşü bozulur; bunu açılışta yakalarız. localhost istisna: uygulamayı
+    // kendi bilgisayarında `next start` ile denerken HTTPS yok.
+    .refine(
+      (env) =>
+        env.NODE_ENV !== "production" ||
+        env.APP_URL.startsWith("https://") ||
+        /^http:\/\/localhost(:\d+)?$/.test(env.APP_URL),
+      { message: "canlıda https olmalı", path: ["APP_URL"] },
     )
     .safeParse(dropEmpty(raw));
 

@@ -1,5 +1,5 @@
 import "server-only";
-import { eq, lt } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions, users, type Session, type User } from "@/db/schema";
 import { env } from "@/server-env";
@@ -72,13 +72,4 @@ export async function invalidateSession(sessionId: string): Promise<void> {
 /** Şifre değişince kullanıcının tüm cihazlardaki oturumları kapatılır. */
 export async function invalidateUserSessions(userId: string): Promise<void> {
   await db.delete(sessions).where(eq(sessions.userId, userId));
-}
-
-/** Süresi dolmuş oturumları siler. İleride zamanlanmış bir iş çağıracak. */
-export async function deleteExpiredSessions(): Promise<number> {
-  const deleted = await db
-    .delete(sessions)
-    .where(lt(sessions.expiresAt, new Date()))
-    .returning({ id: sessions.id });
-  return deleted.length;
 }
