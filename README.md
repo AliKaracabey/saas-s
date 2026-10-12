@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/AliKaracabey/saas-s/actions/workflows/ci.yml/badge.svg)](https://github.com/AliKaracabey/saas-s/actions/workflows/ci.yml)
 
+**Canlı demo:** <https://saas-s.vercel.app>
+
 Her SaaS ürününün ihtiyaç duyduğu ortak altyapıyı (kimlik doğrulama, ekipler, roller, abonelik, testler) içeren yeniden kullanılabilir bir başlangıç şablonu. Adım adım geliştiriliyor; her aşama ayrı bir pull request olarak eklenir.
 
 ## Teknolojiler
