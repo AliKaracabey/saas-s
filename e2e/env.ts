@@ -15,6 +15,7 @@ export const E2E_URL = `http://localhost:${E2E_PORT}`;
 export const E2E_DATABASE_URL = process.env.E2E_DATABASE_URL ?? base.toString();
 export const OUTBOX_FILE = path.resolve("test-results/e2e-outbox.jsonl");
 export const WEBHOOK_SECRET = "whsec_e2e_test";
+export const CRON_SECRET = "e2e-cron-gizli-anahtari";
 
 export const serverEnv: Record<string, string> = {
   DATABASE_URL: E2E_DATABASE_URL,
@@ -29,6 +30,9 @@ export const serverEnv: Record<string, string> = {
   STRIPE_SECRET_KEY: "sk_test_e2e",
   STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET,
   STRIPE_PRICE_PRO: "price_e2e",
+  CRON_SECRET,
+  RESEND_API_KEY: "",
+  EMAIL_FROM: "",
   GITHUB_CLIENT_ID: "",
   GITHUB_CLIENT_SECRET: "",
 };
